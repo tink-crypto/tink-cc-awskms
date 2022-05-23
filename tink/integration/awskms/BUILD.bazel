@@ -1,0 +1,94 @@
+package(default_visibility = ["//:__subpackages__"])
+
+licenses(["notice"])
+
+cc_library(
+    name = "aws_crypto",
+    srcs = [
+        "aws_crypto.cc",
+    ],
+    hdrs = [
+        "aws_crypto.h",
+    ],
+    include_prefix = "tink/integration/awskms",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@aws_cpp_sdk//:aws_sdk_core",
+        "@boringssl//:crypto",
+        "@com_google_absl//absl/base",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "aws_kms_aead",
+    srcs = ["aws_kms_aead.cc"],
+    hdrs = ["aws_kms_aead.h"],
+    include_prefix = "tink/integration/awskms",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@aws_cpp_sdk//:aws_sdk_core",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@tink_cc//tink:aead",
+        "@tink_cc//tink/util:status",
+        "@tink_cc//tink/util:statusor",
+    ],
+    alwayslink = 1,
+)
+
+cc_library(
+    name = "aws_kms_client",
+    srcs = ["aws_kms_client.cc"],
+    hdrs = ["aws_kms_client.h"],
+    include_prefix = "tink/integration/awskms",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":aws_crypto",
+        ":aws_kms_aead",
+        "@aws_cpp_sdk//:aws_sdk_core",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
+        "@tink_cc//tink:kms_client",
+        "@tink_cc//tink:kms_clients",
+        "@tink_cc//tink/util:status",
+        "@tink_cc//tink/util:statusor",
+    ],
+    alwayslink = 1,
+)
+
+# tests
+
+cc_test(
+    name = "aws_kms_aead_test",
+    size = "medium",
+    srcs = ["aws_kms_aead_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":aws_kms_aead",
+        "@aws_cpp_sdk//:aws_sdk_core",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//tink/util:status",
+        "@tink_cc//tink/util:statusor",
+    ],
+)
+
+cc_test(
+    name = "aws_kms_client_test",
+    size = "medium",
+    srcs = ["aws_kms_client_test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    data = ["//testdata:credentials"],
+    deps = [
+        ":aws_kms_client",
+        "@aws_cpp_sdk//:aws_sdk_core",
+        "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+        "@tink_cc//tink/util:status",
+        "@tink_cc//tink/util:statusor",
+        "@tink_cc//tink/util:test_matchers",
+        "@tink_cc//tink/util:test_util",
+    ],
+)
