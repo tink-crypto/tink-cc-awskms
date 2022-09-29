@@ -20,7 +20,7 @@ set -euo pipefail
 if [[ -n "${KOKORO_ARTIFACTS_DIR:-}" ]]; then
   TINK_BASE_DIR="$(echo "${KOKORO_ARTIFACTS_DIR}"/git*)"
   cd "${TINK_BASE_DIR}/tink_cc_awskms"
-  chmod +x "${KOKORO_GFILE_DIR}"
+  chmod +x "${KOKORO_GFILE_DIR}/use_bazel.sh"
   "${KOKORO_GFILE_DIR}/use_bazel.sh" "$(cat .bazelversion)"
 fi
 
