@@ -61,3 +61,12 @@ def tink_cc_awskms_deps():
             strip_prefix = "zlib-1.2.12",
             build_file = "@tink_cc_awskms//:third_party/zlib.BUILD.bazel",
         )
+
+    if not native.existing_rule("tink_cc"):
+        # Release from 2023-11-23.
+        http_archive(
+            name = "tink_cc",
+            sha256 = "3804afecbe7096d3786b660e9cd5f365f064743eec52d76984abb9da38dd0fb3",
+            strip_prefix = "tink-cc-2.1.0",
+            url = "https://github.com/tink-crypto/tink-cc/releases/download/v2.1.0/tink-cc-2.1.0.zip",
+        )
