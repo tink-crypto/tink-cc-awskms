@@ -63,10 +63,10 @@ def tink_cc_awskms_deps():
         )
 
     if not native.existing_rule("tink_cc"):
-        # Release from 2023-11-23.
+        # Release from 2024-04-05.
         http_archive(
             name = "tink_cc",
-            sha256 = "3804afecbe7096d3786b660e9cd5f365f064743eec52d76984abb9da38dd0fb3",
-            strip_prefix = "tink-cc-2.1.0",
-            url = "https://github.com/tink-crypto/tink-cc/releases/download/v2.1.0/tink-cc-2.1.0.zip",
+            sha256 = "d0fefc61e3bde758c8773f1348e6a64fc4fd6ecafe62c4adc0df8957ce800757",
+            strip_prefix = "tink-cc-2.1.2",
+            url = "https://github.com/tink-crypto/tink-cc/releases/download/v2.1.2/tink-cc-2.1.2.zip",
         )
