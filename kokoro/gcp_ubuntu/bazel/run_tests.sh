@@ -55,5 +55,5 @@ if [[ "${IS_KOKORO}" == "true" ]]; then
 fi
 readonly MANUAL_TARGETS
 
-./kokoro/testutils/run_command.sh "${RUN_COMMAND_ARGS[@]}" \
+./kokoro/testutils/docker_execute.sh "${RUN_COMMAND_ARGS[@]}" \
   ./kokoro/testutils/run_bazel_tests.sh . "${MANUAL_TARGETS[@]}"
