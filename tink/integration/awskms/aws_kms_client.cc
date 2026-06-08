@@ -100,7 +100,7 @@ util::StatusOr<std::string> GetValue(absl::string_view name,
   if (parts.size() != 2 || absl::StripAsciiWhitespace(parts[0]) != name) {
     return util::Status(absl::StatusCode::kInvalidArgument,
                         absl::StrCat("Expected line to have the format: ", name,
-                                     " = value. Found: ", line));
+                                     " = value."));
   }
   return std::string(absl::StripAsciiWhitespace(parts[1]));
 }
@@ -156,7 +156,7 @@ util::StatusOr<Aws::Auth::AWSCredentials> GetAwsCredentials(
     return util::Status(
         absl::StatusCode::kInvalidArgument,
         absl::StrCat("Invalid format of credentials in file ", credentials_path,
-                     " : ", key_id_result.status().message()));
+                     " line 2: ", key_id_result.status().message()));
   }
   util::StatusOr<std::string> secret_key_result =
       GetValue("aws_secret_access_key", creds_lines[2]);
@@ -164,7 +164,7 @@ util::StatusOr<Aws::Auth::AWSCredentials> GetAwsCredentials(
     return util::Status(
         absl::StatusCode::kInvalidArgument,
         absl::StrCat("Invalid format of credentials in file ", credentials_path,
-                     " : ", secret_key_result.status().message()));
+                     " line 3: ", secret_key_result.status().message()));
   }
   return Aws::Auth::AWSCredentials(key_id_result.value().c_str(),
                                    secret_key_result.value().c_str());
