@@ -16,6 +16,8 @@
 
 #include "tink/integration/awskms/aws_kms_aead.h"
 
+#include <vector>
+
 #include "aws/core/auth/AWSCredentialsProvider.h"
 #include "aws/core/client/AWSClient.h"
 #include "aws/core/utils/Outcome.h"
@@ -30,6 +32,7 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
 #include "tink/aead.h"
 #include "tink/util/status.h"
@@ -44,6 +47,14 @@ namespace {
 std::string AwsErrorToString(Aws::Client::AWSError<Aws::KMS::KMSErrors> err) {
   return absl::StrCat("AWS error code: ", err.GetErrorType(), ", ",
                       err.GetExceptionName(), ": ", err.GetMessage());
+}
+
+// IsKeyArnFormat returns true if `key_arn` is in key ARN format
+// (arn:<partition>:kms:<region>:<account>:key/<key-id>). The check is the C++
+// equivalent of tink-java-awskms `AwsKmsAead.isKeyArnFormat`.
+bool IsKeyArnFormat(absl::string_view key_arn) {
+  std::vector<absl::string_view> tokens = absl::StrSplit(key_arn, ':');
+  return tokens.size() == 6 && absl::StartsWith(tokens[5], "key/");
 }
 
 }  // namespace
@@ -106,6 +117,17 @@ util::StatusOr<std::string> AwsKmsAead::Decrypt(
     return util::Status(absl::StatusCode::kInvalidArgument,
                         absl::StrCat("AWS KMS decryption failed with error: ",
                                      AwsErrorToString(err)));
+  }
+  // Verify the returned KeyId matches the configured one. If we don't do this,
+  // the possibility exists for the ciphertext to be replaced by one under a key
+  // we don't control/expect, but do have decrypt permissions on. The check is
+  // skipped if key_arn_ is not in key ARN format, matching the behavior of the
+  // Java SDK (AwsKmsAead.java:92).
+  // See https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#key-id.
+  if (IsKeyArnFormat(key_arn_) &&
+      outcome.GetResult().GetKeyId() != key_arn_) {
+    return util::Status(absl::StatusCode::kInvalidArgument,
+                        "AWS KMS decryption failed: wrong key id");
   }
   auto& buffer = outcome.GetResult().GetPlaintext();
   std::string plaintext(
